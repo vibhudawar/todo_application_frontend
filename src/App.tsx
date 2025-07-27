@@ -4,9 +4,12 @@ import {
  Route,
  Navigate,
 } from "react-router-dom";
-import {AuthProvider, useAuth} from "./context/AuthContext";
-import {ThemeProvider} from "./context/ThemeContext";
-import {TodoProvider} from "./context/TodoContext";
+import {useEffect} from "react";
+import {Provider} from "react-redux";
+import {store} from "./store";
+import {useAppSelector, useAppDispatch} from "./store/hooks";
+import {initializeAuth, selectIsAuthenticated, selectAuthLoading} from "./store/authSlice";
+import {initializeTheme} from "./store/themeSlice";
 import {ProtectedRoute} from "./components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -15,7 +18,8 @@ import TodoPage from "./pages/TodoPage";
 
 // Component to handle authenticated redirects
 function AuthenticatedRedirect() {
- const {isAuthenticated, isLoading} = useAuth();
+ const isAuthenticated = useAppSelector(selectIsAuthenticated);
+ const isLoading = useAppSelector(selectAuthLoading);
 
  if (isLoading) {
   return (
@@ -34,7 +38,8 @@ function AuthenticatedRedirect() {
 
 // Component to redirect authenticated users away from auth pages
 function AuthPageRedirect({children}: {children: React.ReactNode}) {
- const {isAuthenticated, isLoading} = useAuth();
+ const isAuthenticated = useAppSelector(selectIsAuthenticated);
+ const isLoading = useAppSelector(selectAuthLoading);
 
  if (isLoading) {
   return (
@@ -82,9 +87,7 @@ function AppRoutes() {
     path="/todos"
     element={
      <ProtectedRoute>
-      <TodoProvider>
-       <TodoPage />
-      </TodoProvider>
+      <TodoPage />
      </ProtectedRoute>
     }
    />
@@ -94,17 +97,28 @@ function AppRoutes() {
  );
 }
 
+function AppContent() {
+ const dispatch = useAppDispatch();
+
+ useEffect(() => {
+  dispatch(initializeAuth());
+  dispatch(initializeTheme());
+ }, [dispatch]);
+
+ return (
+  <Router>
+   <div className="min-h-screen bg-background text-foreground">
+    <AppRoutes />
+   </div>
+  </Router>
+ );
+}
+
 function App() {
  return (
-  <ThemeProvider>
-   <Router>
-    <AuthProvider>
-     <div className="min-h-screen bg-background text-foreground">
-      <AppRoutes />
-     </div>
-    </AuthProvider>
-   </Router>
-  </ThemeProvider>
+  <Provider store={store}>
+   <AppContent />
+  </Provider>
  );
 }
 

@@ -6,7 +6,8 @@ import {cn} from "../../lib/utils";
 import {Button} from "../../components/ui/button";
 import {Input} from "../../components/ui/input";
 import {Label} from "../../components/ui/label";
-import {useAuth} from "../../context/AuthContext";
+import {useAppSelector, useAppDispatch} from "../../store/hooks";
+import {signup, selectAuthLoading, selectAuthError} from "../../store/authSlice";
 import type {UserSignup} from "../../types/auth";
 
 interface SignupFormData extends UserSignup {
@@ -18,7 +19,9 @@ interface SignupFormProps {
 }
 
 export function SignupForm({className}: SignupFormProps) {
- const {signup, isLoading, error} = useAuth();
+ const dispatch = useAppDispatch();
+ const isLoading = useAppSelector(selectAuthLoading);
+ const error = useAppSelector(selectAuthError);
  const navigate = useNavigate();
  const [showPassword, setShowPassword] = useState(false);
  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -35,14 +38,15 @@ export function SignupForm({className}: SignupFormProps) {
 
  const onSubmit = async (data: SignupFormData) => {
   try {
+   // eslint-disable-next-line @typescript-eslint/no-unused-vars
    const {confirmPassword, ...signupData} = data;
-   await signup(signupData);
+   await dispatch(signup(signupData)).unwrap();
    setSuccess(true);
    setTimeout(() => {
     navigate("/login");
    }, 2000);
-  } catch (error) {
-   // Error handled by context
+  } catch {
+   // Error handled by Redux
   }
  };
 

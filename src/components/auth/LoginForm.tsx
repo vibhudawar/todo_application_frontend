@@ -6,7 +6,8 @@ import {cn} from "../../lib/utils";
 import {Button} from "../../components/ui/button";
 import {Input} from "../../components/ui/input";
 import {Label} from "../../components/ui/label";
-import {useAuth} from "../../context/AuthContext";
+import {useAppSelector, useAppDispatch} from "../../store/hooks";
+import {login, selectAuthLoading, selectAuthError} from "../../store/authSlice";
 import type {UserLogin} from "../../types/auth";
 
 interface LoginFormProps {
@@ -14,7 +15,9 @@ interface LoginFormProps {
 }
 
 export function LoginForm({className}: LoginFormProps) {
- const {login, isLoading, error} = useAuth();
+ const dispatch = useAppDispatch();
+ const isLoading = useAppSelector(selectAuthLoading);
+ const error = useAppSelector(selectAuthError);
  const navigate = useNavigate();
  const [showPassword, setShowPassword] = useState(false);
 
@@ -26,10 +29,10 @@ export function LoginForm({className}: LoginFormProps) {
 
  const onSubmit = async (data: UserLogin) => {
   try {
-   await login(data);
+   await dispatch(login(data)).unwrap();
    navigate("/todos");
-  } catch (error) {
-   // Error handled by context
+  } catch {
+   // Error handled by Redux
   }
  };
 

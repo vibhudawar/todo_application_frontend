@@ -1,12 +1,14 @@
 import {Navigate, useLocation} from "react-router-dom";
-import {useAuth} from "../context/AuthContext";
+import {useAppSelector} from "../store/hooks";
+import {selectIsAuthenticated, selectAuthLoading} from "../store/authSlice";
 
 interface ProtectedRouteProps {
  children: React.ReactNode;
 }
 
 export function ProtectedRoute({children}: ProtectedRouteProps) {
- const {isAuthenticated, isLoading} = useAuth();
+ const isAuthenticated = useAppSelector(selectIsAuthenticated);
+ const isLoading = useAppSelector(selectAuthLoading);
  const location = useLocation();
 
  // Show loading while checking authentication

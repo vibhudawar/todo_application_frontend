@@ -1,14 +1,18 @@
 import {useEffect} from "react";
-import {useAuth} from "../context/AuthContext";
-import {useTodos} from "../context/TodoContext";
+import {useAppSelector, useAppDispatch} from "../store/hooks";
+import {selectUser, logout} from "../store/authSlice";
+import {fetchTodos, selectTodos, selectTodosLoading, selectTodosError} from "../store/todoSlice";
 
 export default function TodoPage() {
- const {user, logout} = useAuth();
- const {fetchTodos, todos, loading, error} = useTodos();
+ const dispatch = useAppDispatch();
+ const user = useAppSelector(selectUser);
+ const todos = useAppSelector(selectTodos);
+ const loading = useAppSelector(selectTodosLoading);
+ const error = useAppSelector(selectTodosError);
 
  useEffect(() => {
-  fetchTodos();
- }, [fetchTodos]);
+  dispatch(fetchTodos(1));
+ }, [dispatch]);
 
  return (
   <div className="min-h-screen bg-background">
@@ -17,7 +21,7 @@ export default function TodoPage() {
      <div className="flex justify-between items-center py-4">
       <h1 className="text-2xl font-bold">Welcome back, {user?.name}!</h1>
       <button
-       onClick={logout}
+       onClick={() => dispatch(logout())}
        className="text-sm text-muted-foreground hover:text-foreground"
       >
        Logout
